@@ -20,6 +20,11 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## OBD-II Technical Resources
+
+- [Supported OBD-II Parameters (PIDs)](https://www.obdautodoctor.com/help/articles/supported-obd-parameters/) - Reference for standard Mode 01 PIDs.
+- [ELM327 AT Commands](https://www.elmelectronics.com/wp-content/uploads/2016/07/ELM327DS.pdf) - Official documentation for hardware communication.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
