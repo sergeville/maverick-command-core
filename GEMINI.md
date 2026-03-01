@@ -1,4 +1,4 @@
-# FordMaverick Project
+# Maverick Command Core Project
 
 ## Project Overview
 This project is dedicated to the analysis and visualization of Ford Maverick ECU scan data. It consists of a raw data file and a Next.js web application intended to display this information.
