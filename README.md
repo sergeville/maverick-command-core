@@ -6,6 +6,26 @@ A multi-platform automotive diagnostic suite for the **Ford Maverick**. Built in
 
 ## Apps
 
+### 3. `maverick-obd-swift/` — Native iPhone App (Swift / SwiftUI) ⭐ Recommended
+
+Pure native Swift app using CoreBluetooth directly — no WebView, no plugin bridge. Best choice for in-car use: reliable BLE reconnection, background mode, lower power draw, and true iOS-native feel.
+
+**Stack:** SwiftUI + Swift Charts + CoreBluetooth
+**Minimum iOS:** 16.0
+**Bluetooth background mode:** `bluetooth-central` entitlement included
+
+**Open in Xcode:**
+```bash
+cd maverick-obd-swift
+xcodegen generate   # regenerate if project.yml changes
+open MaverickOBD.xcodeproj
+```
+Then select your iPhone → **⌘R**. Set your Development Team in Signing & Capabilities before first build.
+
+> Live BLE requires a physical iPhone. Simulator does not support Bluetooth.
+
+---
+
 ### 1. `maverick-ecu-app` — Desktop ECU Dashboard (port 3009)
 
 High-contrast Next.js 15 dashboard for desktop/laptop use via Web Bluetooth. Connects to a V-LINK / ELM327 BLE OBD-II dongle directly from Chrome.

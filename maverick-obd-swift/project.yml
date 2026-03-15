@@ -1,0 +1,35 @@
+name: MaverickOBD
+
+options:
+  bundleIdPrefix: com.maverick
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15"
+  createIntermediateGroups: true
+
+targets:
+  MaverickOBD:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: MaverickOBD
+        NSBluetoothAlwaysUsageDescription: "MaverickOBD uses Bluetooth to connect to your vehicle's OBD-II adapter for live diagnostics."
+        NSBluetoothPeripheralUsageDescription: "MaverickOBD reads live engine data from your OBD-II BLE adapter."
+        UIBackgroundModes:
+          - bluetooth-central
+        UILaunchStoryboardName: LaunchScreen
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      SWIFT_VERSION: "5.9"
+      PRODUCT_BUNDLE_IDENTIFIER: com.maverick.obdflux.native
+      MARKETING_VERSION: "1.0"
+      CURRENT_PROJECT_VERSION: "1"
+      DEVELOPMENT_TEAM: ""
+      INFOPLIST_FILE: Sources/Info.plist

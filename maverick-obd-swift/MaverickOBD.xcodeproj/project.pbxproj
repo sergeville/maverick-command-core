@@ -1,0 +1,353 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0137DDBE863CC67110265BE9 /* ConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11249D4B39EBC5624F41F099 /* ConnectionView.swift */; };
+		142F3F0DB242B533F984E500 /* SystemBusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BABC3352828800D0B483CAF1 /* SystemBusView.swift */; };
+		1EBA9A9D0FFAB9B586A59BBB /* TelemetryChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8E62B142E5B277B5FD1D1F /* TelemetryChartView.swift */; };
+		4BFB31F318B9AEF5883CD826 /* MaverickOBDApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 820C299FD43BBEB3636F8391 /* MaverickOBDApp.swift */; };
+		8E43A0A7EF4077F43E3F0AE8 /* ELM327.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE178C073B0442999D1C679 /* ELM327.swift */; };
+		91DFBBABACF66F1D7832A1C5 /* OBDBLEManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97571ECBEA00EDB838EBE580 /* OBDBLEManager.swift */; };
+		BE2AD13B62B1CA1E9E5D49F1 /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856522E4BA9639D3DD969852 /* Telemetry.swift */; };
+		C53E22CB6F1E15EFB347D199 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93074799220C1A813E675A00 /* DashboardView.swift */; };
+		E0D8298D2D682D8C74442D30 /* MetricCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BC1EC7FF55E3C5EAAFF8DEE /* MetricCardView.swift */; };
+		E4A613859FCB35AD2F3A228A /* AdapterProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8361AC4CA47C87115E9666B /* AdapterProfile.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		11249D4B39EBC5624F41F099 /* ConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionView.swift; sourceTree = "<group>"; };
+		1E8E62B142E5B277B5FD1D1F /* TelemetryChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryChartView.swift; sourceTree = "<group>"; };
+		321124124CCE4BE8C5203FD6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		534A1A76EDF26B701BB81691 /* MaverickOBD.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MaverickOBD.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7BC1EC7FF55E3C5EAAFF8DEE /* MetricCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricCardView.swift; sourceTree = "<group>"; };
+		820C299FD43BBEB3636F8391 /* MaverickOBDApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaverickOBDApp.swift; sourceTree = "<group>"; };
+		856522E4BA9639D3DD969852 /* Telemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
+		93074799220C1A813E675A00 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		97571ECBEA00EDB838EBE580 /* OBDBLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OBDBLEManager.swift; sourceTree = "<group>"; };
+		9AE178C073B0442999D1C679 /* ELM327.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ELM327.swift; sourceTree = "<group>"; };
+		BABC3352828800D0B483CAF1 /* SystemBusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemBusView.swift; sourceTree = "<group>"; };
+		F8361AC4CA47C87115E9666B /* AdapterProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdapterProfile.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		02D43FA540D3441F6E2BF807 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				856522E4BA9639D3DD969852 /* Telemetry.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		7474D34A69786757447B27F9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				534A1A76EDF26B701BB81691 /* MaverickOBD.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		987767B7F36D46434E629E27 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				11249D4B39EBC5624F41F099 /* ConnectionView.swift */,
+				93074799220C1A813E675A00 /* DashboardView.swift */,
+				7BC1EC7FF55E3C5EAAFF8DEE /* MetricCardView.swift */,
+				BABC3352828800D0B483CAF1 /* SystemBusView.swift */,
+				1E8E62B142E5B277B5FD1D1F /* TelemetryChartView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		CD7A05DB336B223E925509F0 /* BLE */ = {
+			isa = PBXGroup;
+			children = (
+				F8361AC4CA47C87115E9666B /* AdapterProfile.swift */,
+				9AE178C073B0442999D1C679 /* ELM327.swift */,
+				97571ECBEA00EDB838EBE580 /* OBDBLEManager.swift */,
+			);
+			path = BLE;
+			sourceTree = "<group>";
+		};
+		E014995C5F92C2AEDB11D9D8 = {
+			isa = PBXGroup;
+			children = (
+				E3E0F9D669992F4012AE29B2 /* Sources */,
+				7474D34A69786757447B27F9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E3E0F9D669992F4012AE29B2 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				321124124CCE4BE8C5203FD6 /* Info.plist */,
+				820C299FD43BBEB3636F8391 /* MaverickOBDApp.swift */,
+				CD7A05DB336B223E925509F0 /* BLE */,
+				02D43FA540D3441F6E2BF807 /* Models */,
+				987767B7F36D46434E629E27 /* Views */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EFD55E5C2664BBB6F5F07AC0 /* MaverickOBD */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 208A2EC66AC1A41719CCB3C4 /* Build configuration list for PBXNativeTarget "MaverickOBD" */;
+			buildPhases = (
+				AE2C95259A484C1AA05A6727 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MaverickOBD;
+			packageProductDependencies = (
+			);
+			productName = MaverickOBD;
+			productReference = 534A1A76EDF26B701BB81691 /* MaverickOBD.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B003D37367BDB2CCED59C07A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					EFD55E5C2664BBB6F5F07AC0 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = E8A2738F614B8C8CA8B61EAE /* Build configuration list for PBXProject "MaverickOBD" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = E014995C5F92C2AEDB11D9D8;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 7474D34A69786757447B27F9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EFD55E5C2664BBB6F5F07AC0 /* MaverickOBD */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AE2C95259A484C1AA05A6727 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E4A613859FCB35AD2F3A228A /* AdapterProfile.swift in Sources */,
+				0137DDBE863CC67110265BE9 /* ConnectionView.swift in Sources */,
+				C53E22CB6F1E15EFB347D199 /* DashboardView.swift in Sources */,
+				8E43A0A7EF4077F43E3F0AE8 /* ELM327.swift in Sources */,
+				4BFB31F318B9AEF5883CD826 /* MaverickOBDApp.swift in Sources */,
+				E0D8298D2D682D8C74442D30 /* MetricCardView.swift in Sources */,
+				91DFBBABACF66F1D7832A1C5 /* OBDBLEManager.swift in Sources */,
+				142F3F0DB242B533F984E500 /* SystemBusView.swift in Sources */,
+				BE2AD13B62B1CA1E9E5D49F1 /* Telemetry.swift in Sources */,
+				1EBA9A9D0FFAB9B586A59BBB /* TelemetryChartView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		039A6EDDD22B8D6022556535 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		04578F05ECAA0F8D8624718C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Sources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maverick.obdflux.native;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9179A4D03E86A582C9086AA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CC125D1F544E1A7C27F85984 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = Sources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.maverick.obdflux.native;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		208A2EC66AC1A41719CCB3C4 /* Build configuration list for PBXNativeTarget "MaverickOBD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04578F05ECAA0F8D8624718C /* Debug */,
+				CC125D1F544E1A7C27F85984 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E8A2738F614B8C8CA8B61EAE /* Build configuration list for PBXProject "MaverickOBD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9179A4D03E86A582C9086AA0 /* Debug */,
+				039A6EDDD22B8D6022556535 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B003D37367BDB2CCED59C07A /* Project object */;
+}
