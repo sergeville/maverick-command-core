@@ -35,6 +35,7 @@ final class OBDBLEManager: NSObject, ObservableObject {
     @Published var dtcScanState: DTCScanState = .idle
     @Published var initStep: String = ""        // e.g. "3 / 7 · ATH0"
     @Published var initAcked: [Bool] = []       // true = response received
+    @Published var discoveredDeviceName: String = ""
 
     enum DTCScanState: Equatable {
         case idle
@@ -53,6 +54,7 @@ final class OBDBLEManager: NSObject, ObservableObject {
     private var initIndex = 0
     private var pidIndex = 0
     private var pollTimer: Timer?
+    private var scanTimer: Timer?
     private var dtcScanPending = false
 
     private let maxHistory = 120
@@ -81,8 +83,15 @@ final class OBDBLEManager: NSObject, ObservableObject {
             return
         }
         state = .scanning
-        addLog("SCAN: Scanning for OBD adapter…")
-        central.scanForPeripherals(withServices: AdapterProfile.serviceUUIDs, options: nil)
+        addLog("SCAN: Scanning all BLE peripherals…")
+        // Scan with nil to catch adapters that don't advertise service UUIDs in broadcasts
+        central.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
+        scanTimer = Timer.scheduledTimer(withTimeInterval: 20, repeats: false) { [weak self] _ in
+            guard let self, case .scanning = self.state else { return }
+            self.central.stopScan()
+            self.state = .error("No OBD adapter found. Plug in adapter and try again.")
+            self.addLog("SCAN: Timeout — no adapter found after 20s")
+        }
     }
 
     func scanDTCs() {
@@ -122,6 +131,8 @@ final class OBDBLEManager: NSObject, ObservableObject {
     }
 
     func disconnect() {
+        scanTimer?.invalidate()
+        scanTimer = nil
         pollTimer?.invalidate()
         pollTimer = nil
         if let p = peripheral { central.cancelPeripheralConnection(p) }
@@ -142,6 +153,7 @@ final class OBDBLEManager: NSObject, ObservableObject {
         pidIndex = 0
         initStep = ""
         initAcked = []
+        discoveredDeviceName = ""
     }
 
     private func mockDTCs() {
@@ -183,6 +195,7 @@ final class OBDBLEManager: NSObject, ObservableObject {
         let type: CBCharacteristicWriteType = char.properties.contains(.writeWithoutResponse)
             ? .withoutResponse : .withResponse
         p.writeValue(data, for: char, type: type)
+        addLog("TX → \(command)")
     }
 
     private func startInit() {
@@ -286,8 +299,29 @@ extension OBDBLEManager: CBCentralManagerDelegate {
                         didDiscover peripheral: CBPeripheral,
                         advertisementData: [String: Any],
                         rssi RSSI: NSNumber) {
+        let name = peripheral.name ?? ""
+        let upper = name.uppercased()
+
+        // Check advertised service UUIDs
+        let advServices = (advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID]) ?? []
+        let matchesByService = AdapterProfile.serviceUUIDs.contains { advServices.contains($0) }
+
+        // Check name patterns common to OBD BLE adapters
+        let obdKeywords = ["OBD", "ELM", "VLINK", "V-LINK", "OBDII", "OBD2", "LINK", "ECU", "CAR", "BLE"]
+        let matchesByName = obdKeywords.contains { upper.contains($0) }
+
+        addLog("SCAN: Found '\(name.isEmpty ? "unnamed" : name)' RSSI=\(RSSI) svc=\(advServices.map(\.uuidString).joined(separator: ","))")
+
+        guard matchesByService || matchesByName else {
+            addLog("SCAN: Skipped — not an OBD device")
+            return
+        }
+
+        scanTimer?.invalidate()
+        scanTimer = nil
         central.stopScan()
         self.peripheral = peripheral
+        discoveredDeviceName = name.isEmpty ? "OBD Adapter" : name
         peripheral.delegate = self
         state = .connecting
         addLog("LINK: Found \(peripheral.name ?? "unknown") — connecting…")
@@ -296,7 +330,7 @@ extension OBDBLEManager: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         addLog("LINK: Connected — discovering services…")
-        peripheral.discoverServices(AdapterProfile.serviceUUIDs)
+        peripheral.discoverServices(nil)  // discover all, match after
     }
 
     func centralManager(_ central: CBCentralManager,
@@ -331,30 +365,51 @@ extension OBDBLEManager: CBPeripheralDelegate {
             state = .error("Service discovery failed")
             return
         }
+        let found = services.map { $0.uuid.uuidString }.joined(separator: ", ")
+        addLog("PROF: Services found: \(found)")
+
         for service in services {
             if let profile = AdapterProfile.all.first(where: { $0.serviceUUID == service.uuid }) {
                 activeProfile = profile
                 addLog("PROF: Matched \(profile.name)")
-                peripheral.discoverCharacteristics([profile.writeUUID, profile.notifyUUID], for: service)
+                peripheral.discoverCharacteristics(nil, for: service)  // discover all chars
                 return
             }
         }
-        state = .error("No compatible BLE serial profile found")
-        addLog("ERR: No compatible profile in discovered services")
+
+        // No known profile matched — try the first service anyway (auto-probe)
+        if let firstService = services.first {
+            addLog("PROF: No match — probing first service \(firstService.uuid.uuidString)")
+            activeProfile = AdapterProfile(
+                name: "Auto-\(firstService.uuid.uuidString.prefix(8))",
+                serviceUUID: firstService.uuid,
+                writeUUID: CBUUID(string: "FFE1"),
+                notifyUUID: CBUUID(string: "FFE1")
+            )
+            peripheral.discoverCharacteristics(nil, for: firstService)
+        } else {
+            state = .error("No BLE services found on adapter")
+            addLog("ERR: Adapter has no services")
+        }
     }
 
     func peripheral(_ peripheral: CBPeripheral,
                     didDiscoverCharacteristicsFor service: CBService,
                     error: Error?) {
-        guard error == nil, let chars = service.characteristics, let profile = activeProfile else { return }
+        guard error == nil, let chars = service.characteristics else { return }
+
+        let charList = chars.map { "\($0.uuid.uuidString.prefix(8)) [\($0.properties.rawValue)]" }.joined(separator: ", ")
+        addLog("PROF: Chars: \(charList)")
 
         for char in chars {
-            if char.uuid == profile.notifyUUID {
+            if char.properties.contains(.notify) || char.properties.contains(.indicate) {
                 notifyChar = char
                 peripheral.setNotifyValue(true, for: char)
+                addLog("PROF: notify=\(char.uuid.uuidString.prefix(8))")
             }
-            if char.uuid == profile.writeUUID {
+            if char.properties.contains(.write) || char.properties.contains(.writeWithoutResponse) {
                 writeChar = char
+                addLog("PROF: write=\(char.uuid.uuidString.prefix(8))")
             }
         }
         // Fallback: some FFE0 adapters expose only FFE1 (notify + write)
@@ -385,6 +440,10 @@ extension OBDBLEManager: CBPeripheralDelegate {
             .replacingOccurrences(of: ">", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         responseBuffer = ""
-        if !response.isEmpty { handleResponse(response) }
+        if !response.isEmpty {
+            let preview = response.prefix(40).replacingOccurrences(of: "\r", with: " ")
+            addLog("RX ← \(preview)")
+            handleResponse(response)
+        }
     }
 }

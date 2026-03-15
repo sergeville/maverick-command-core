@@ -1,29 +1,41 @@
+/**
+ * Key lessons from iOS BLE testing (IOS-Vlink adapter):
+ *  1. Discover ALL services upfront via getPrimaryServices() — don't probe one-by-one
+ *  2. Detect write/notify chars by property flags, not hardcoded UUIDs
+ *  3. Single-char fallback: if no dedicated write char, use the notify char
+ *  4. Buffer until '>' prompt (already done here — keep it)
+ *  5. ATCAF0 required in full init sequence (CAN auto-format off)
+ *  6. Use standard ELM327 uppercase AT commands — no case-switching needed
+ */
+
+const ELM327_INIT = [
+  { cmd: 'ATZ',    desc: 'Reset' },
+  { cmd: 'ATE0',   desc: 'Echo off' },
+  { cmd: 'ATL0',   desc: 'Linefeeds off' },
+  { cmd: 'ATS0',   desc: 'Spaces off' },
+  { cmd: 'ATH0',   desc: 'Headers off' },
+  { cmd: 'ATCAF0', desc: 'CAN auto-format off' },
+  { cmd: 'ATSP0',  desc: 'Auto protocol' },
+];
+
+const KNOWN_SERVICES = [
+  '0000ffe0-0000-1000-8000-00805f9b34fb', // IOS-VLink / FFEx
+  '0000fff0-0000-1000-8000-00805f9b34fb', // V-LINK / FFFx
+  '6e400001-b5a3-f393-e0a9-e50e24dcca9e', // Nordic UART
+  '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC / V-LINK BLE
+  '000018f0-0000-1000-8000-00805f9b34fb',
+  '0000ae00-0000-1000-8000-00805f9b34fb',
+  '00001101-0000-1000-8000-00805f9b34fb', // SPP
+];
+
 export class BluetoothService {
   private device: BluetoothDevice | null = null;
   private server: BluetoothRemoteGATTServer | null = null;
-  private characteristic: BluetoothRemoteGATTCharacteristic | null = null;
+  private writeChar: BluetoothRemoteGATTCharacteristic | null = null;
+  private notifyChar: BluetoothRemoteGATTCharacteristic | null = null;
   private onDataReceived: (data: string) => void;
-  private responseBuffer: string = '';
+  private responseBuffer = '';
   private resolveCommand: ((value: string) => void) | null = null;
-
-  // Expanded list including ISSC (common for IOS-Vlink)
-  private static COMMON_SERVICES = [
-    '0000fff0-0000-1000-8000-00805f9b34fb',
-    '0000ffe0-0000-1000-8000-00805f9b34fb',
-    '000018f0-0000-1000-8000-00805f9b34fb',
-    '0000ae00-0000-1000-8000-00805f9b34fb',
-    '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC / V-LINK Specific
-    '00001101-0000-1000-8000-00805f9b34fb'  // SPP
-  ];
-
-  private static CHARACTERISTIC_MAP: Record<string, string> = {
-    '0000fff0-0000-1000-8000-00805f9b34fb': '0000fff1-0000-1000-8000-00805f9b34fb',
-    '0000ffe0-0000-1000-8000-00805f9b34fb': '0000ffe1-0000-1000-8000-00805f9b34fb',
-    '000018f0-0000-1000-8000-00805f9b34fb': '00002af0-0000-1000-8000-00805f9b34fb',
-    '0000ae00-0000-1000-8000-00805f9b34fb': '0000ae01-0000-1000-8000-00805f9b34fb',
-    '49535343-fe7d-4ae5-8fa9-9fafd205e455': '49535343-1e4d-4bd9-ba61-07c6435a7e56', // ISSC Data
-    '00001101-0000-1000-8000-00805f9b34fb': '00001101-0000-1000-8000-00805f9b34fb'
-  };
 
   constructor(onDataReceived: (data: string) => void) {
     this.onDataReceived = onDataReceived;
@@ -31,110 +43,127 @@ export class BluetoothService {
 
   async connect(): Promise<{ success: boolean; info?: string }> {
     try {
-      this.onDataReceived("LINK: Initializing Deep Scan...");
+      this.onDataReceived('LINK: Requesting BLE device…');
       this.device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: BluetoothService.COMMON_SERVICES
+        optionalServices: KNOWN_SERVICES,
       });
 
-      if (!this.device || !this.device.gatt) throw new Error('Hardware link rejected');
+      if (!this.device?.gatt) throw new Error('Hardware link rejected');
 
-      this.onDataReceived(`LINK: Linking to ${this.device.name}...`);
+      this.onDataReceived(`LINK: Connecting to ${this.device.name ?? 'Unknown'}…`);
       this.server = await this.device.gatt.connect();
-      this.onDataReceived("LINK: GATT linked. Probing for Data Pipes...");
 
-      // Try known pipes first
-      for (const serviceUuid of BluetoothService.COMMON_SERVICES) {
-        try {
-          this.onDataReceived(`BUS: Testing ${serviceUuid.split('-')[0]}...`);
-          const service = await this.server.getPrimaryService(serviceUuid);
-          const charUuid = BluetoothService.CHARACTERISTIC_MAP[serviceUuid];
-          this.characteristic = await service.getCharacteristic(charUuid);
-          
-          if (this.characteristic) {
-            this.onDataReceived(`SUCCESS: Data pipe ${charUuid.split('-')[0]} established.`);
-            break;
-          }
-        } catch (e) { continue; }
+      // Discover ALL services upfront
+      const services = await this.server.getPrimaryServices();
+      const found = services.map((s) => s.uuid.slice(0, 8)).join(', ');
+      this.onDataReceived(`PROF: Services found: ${found}`);
+
+      // Try known services first, detect chars by property flags
+      for (const svcUuid of KNOWN_SERVICES) {
+        const svc = services.find((s) => s.uuid === svcUuid);
+        if (!svc) continue;
+        await this.resolveChars(svc);
+        if (this.writeChar && this.notifyChar) break;
       }
 
-      // If known pipes fail, perform a full inventory
-      if (!this.characteristic) {
-        this.onDataReceived("WARN: Known pipes failed. Performing Full Inventory...");
-        try {
-          const services = await this.server.getPrimaryServices();
-          services.forEach(s => this.onDataReceived(`INVENTORY: Found Service ${s.uuid}`));
-        } catch (e) {
-          this.onDataReceived("INVENTORY: Could not enumerate — add service UUID to optionalServices.");
-        }
-        throw new Error('Pipe mismatch. Check Inventory logs.');
+      // Auto-probe fallback: first service, property-based detection
+      if (!this.writeChar || !this.notifyChar) {
+        const firstSvc = services[0];
+        if (!firstSvc) throw new Error('No BLE services found on adapter');
+        this.onDataReceived(`PROF: No match — probing first service ${firstSvc.uuid.slice(0, 8)}`);
+        await this.resolveChars(firstSvc);
       }
 
-      const props = this.characteristic.properties;
+      if (!this.notifyChar) throw new Error('Required characteristics not found');
+
+      const props = this.notifyChar.properties;
       if (props.notify || props.indicate) {
-        await this.characteristic.startNotifications();
-        this.characteristic.addEventListener('characteristicvaluechanged', this.handleNotifications);
+        await this.notifyChar.startNotifications();
+        this.notifyChar.addEventListener('characteristicvaluechanged', this.handleNotifications);
+        this.onDataReceived(`PROF: Notifications enabled on ${this.notifyChar.uuid.slice(0, 8)}`);
       } else {
-        this.onDataReceived("WARN: Char has no notify — polling mode only.");
+        this.onDataReceived('WARN: Char has no notify — polling mode only');
       }
-      this.onDataReceived("LINK: Pipe Open. Waiting for hardware stability...");
-      await new Promise(r => setTimeout(r, 1000)); // 1s Warm-up
 
-      this.onDataReceived("HANDSHAKE: Initializing polite protocol...");
+      // Brief warm-up
+      await new Promise((r) => setTimeout(r, 500));
 
-      const handshake = [
-        { cmd: 'AT I', desc: 'Identify Chip' },
-        { cmd: 'AT Z', desc: 'Reset' },
-        { cmd: 'AT E0', desc: 'Echo Off' },
-        { cmd: 'AT SP 0', desc: 'Auto Protocol' }
-      ];
+      await this.runHandshake();
 
-      for (const step of handshake) {
-        this.onDataReceived(`TX: ${step.cmd.toLowerCase()} (${step.desc})`);
-        // Try lowercase which is more compatible with some V-LINK firmwares
-        const response = await this.sendCommandAndWait(step.cmd.toLowerCase());
-        this.onDataReceived(`RX: ${response}`);
-        
-        if (response === "TIMEOUT" || response === "ERR") {
-          this.onDataReceived(`RETRY: Trying Uppercase for ${step.cmd}...`);
-          const retryResp = await this.sendCommandAndWait(step.cmd.toUpperCase());
-          this.onDataReceived(`RX: ${retryResp}`);
-        }
-      }
-      
-      return { success: true, info: this.device.name };
-    } catch (error: any) {
-      this.onDataReceived(`FATAL: ${error.message}`);
-      return { success: false, info: error.message };
+      return { success: true, info: this.device.name ?? 'OBD Adapter' };
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      this.onDataReceived(`FATAL: ${msg}`);
+      return { success: false, info: msg };
     }
+  }
+
+  /** Detect write + notify characteristics by property flags */
+  private async resolveChars(service: BluetoothRemoteGATTService): Promise<void> {
+    const chars = await service.getCharacteristics();
+    const charList = chars
+      .map((c) => `${c.uuid.slice(0, 8)} [${c.properties.notify ? 'N' : ''}${c.properties.write ? 'W' : ''}${c.properties.writeWithoutResponse ? 'w' : ''}]`)
+      .join(', ');
+    this.onDataReceived(`PROF: Chars: ${charList}`);
+
+    for (const char of chars) {
+      if ((char.properties.notify || char.properties.indicate) && !this.notifyChar) {
+        this.notifyChar = char;
+        this.onDataReceived(`PROF: notify=${char.uuid.slice(0, 8)}`);
+      }
+      if ((char.properties.write || char.properties.writeWithoutResponse) && !this.writeChar) {
+        this.writeChar = char;
+        this.onDataReceived(`PROF: write=${char.uuid.slice(0, 8)}`);
+      }
+    }
+
+    // Single-char adapter fallback (some adapters expose only one characteristic)
+    if (!this.writeChar && this.notifyChar) {
+      this.writeChar = this.notifyChar;
+      this.onDataReceived('PROF: Using notify char for write (single-char adapter)');
+    }
+  }
+
+  private async runHandshake(): Promise<void> {
+    this.onDataReceived(`INIT: Starting ELM327 init (${ELM327_INIT.length} steps)`);
+    for (let i = 0; i < ELM327_INIT.length; i++) {
+      const { cmd, desc } = ELM327_INIT[i];
+      this.onDataReceived(`INIT: ${i + 1}/${ELM327_INIT.length} · ${cmd} (${desc})`);
+      const response = await this.sendCommandAndWait(cmd);
+      this.onDataReceived(`RX ← ${response}`);
+    }
+    this.onDataReceived('INIT: Complete');
   }
 
   private handleNotifications = (event: Event) => {
     const target = event.target as BluetoothRemoteGATTCharacteristic;
     if (!target.value) return;
-    
+
     const chunk = new TextDecoder().decode(target.value);
     this.responseBuffer += chunk;
 
-    if (this.responseBuffer.includes('>')) {
-      const clean = this.responseBuffer.replace('>', '').trim();
-      if (this.resolveCommand) {
-        this.resolveCommand(clean);
-        this.resolveCommand = null;
-      } else if (clean) {
-        this.onDataReceived(clean);
-      }
-      this.responseBuffer = '';
+    if (!this.responseBuffer.includes('>')) return;
+
+    const clean = this.responseBuffer.replace('>', '').trim();
+    this.responseBuffer = '';
+
+    if (this.resolveCommand) {
+      this.resolveCommand(clean);
+      this.resolveCommand = null;
+    } else if (clean) {
+      const preview = clean.slice(0, 40).replace(/\r/g, ' ');
+      this.onDataReceived(`RX ← ${preview}`);
     }
   };
 
   async sendCommandAndWait(command: string): Promise<string> {
     return new Promise((resolve) => {
       this.resolveCommand = resolve;
-      this.sendCommand(command).catch(() => resolve("ERR"));
+      this.sendCommand(command).catch(() => resolve('ERR'));
       setTimeout(() => {
         if (this.resolveCommand) {
-          this.resolveCommand("TIMEOUT");
+          this.resolveCommand('TIMEOUT');
           this.resolveCommand = null;
         }
       }, 3000);
@@ -142,41 +171,42 @@ export class BluetoothService {
   }
 
   async sendCommand(command: string): Promise<void> {
-    if (!this.characteristic) return;
+    if (!this.writeChar) return;
     const data = new TextEncoder().encode(command + '\r');
-    const props = this.characteristic.properties;
-    if (props.writeWithoutResponse) {
-      await this.characteristic.writeValueWithoutResponse(data);
+    this.onDataReceived(`TX → ${command}`);
+    if (this.writeChar.properties.writeWithoutResponse) {
+      await this.writeChar.writeValueWithoutResponse(data);
     } else {
-      await this.characteristic.writeValueWithResponse(data);
+      await this.writeChar.writeValueWithResponse(data);
     }
   }
 
-  async disconnect() {
+  async disconnect(): Promise<void> {
+    if (this.notifyChar) {
+      try { await this.notifyChar.stopNotifications(); } catch {}
+      this.notifyChar.removeEventListener('characteristicvaluechanged', this.handleNotifications);
+    }
     if (this.device?.gatt?.connected) {
-      this.onDataReceived("LINK: Severing GATT connection...");
+      this.onDataReceived('LINK: Disconnecting…');
       this.device.gatt.disconnect();
     }
+    this.writeChar = null;
+    this.notifyChar = null;
+    this.onDataReceived('LINK: Disconnected');
   }
 
-  async release() {
+  async release(): Promise<void> {
+    await this.disconnect();
     try {
-      if (this.device?.gatt?.connected) {
-        this.device.gatt.disconnect();
-      }
-      
-      // Attempt to revoke browser permissions if supported
       if (this.device && 'forget' in this.device) {
-        this.onDataReceived("LINK: Revoking browser permissions (Forget)...");
-        await (this.device as any).forget();
+        this.onDataReceived('LINK: Revoking browser permissions…');
+        await (this.device as BluetoothDevice & { forget(): Promise<void> }).forget();
       }
-
-      this.device = null;
-      this.server = null;
-      this.characteristic = null;
-      this.onDataReceived("LINK: All hardware references released. System ready for fresh discovery.");
-    } catch (e: any) {
-      this.onDataReceived(`ERROR: Release failed: ${e.message}`);
+    } catch (e: unknown) {
+      this.onDataReceived(`ERROR: Release failed: ${e instanceof Error ? e.message : String(e)}`);
     }
+    this.device = null;
+    this.server = null;
+    this.onDataReceived('LINK: All hardware references released');
   }
 }

@@ -36,4 +36,4 @@ export const PIDS = {
   CONTROL_MODULE_VOLTAGE: '0142',
 } as const;
 
-export const ELM327_INIT = ['ATZ', 'ATE0', 'ATL0', 'ATS0', 'ATH0', 'ATSP0'];
+export const ELM327_INIT = ['ATZ', 'ATE0', 'ATL0', 'ATS0', 'ATH0', 'ATCAF0', 'ATSP0'];
