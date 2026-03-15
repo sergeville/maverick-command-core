@@ -211,7 +211,7 @@ export default function OBDFluxConsole() {
               </div>
               <div className="p-4 bg-white/4 border border-white/8 rounded-2xl text-center">
                 <p className="text-[9px] uppercase tracking-widest text-white/30 mb-1">Voltage</p>
-                <p className="text-2xl font-black tabular-nums text-violet-300">{telem.voltage}V</p>
+                <p className="text-2xl font-black tabular-nums text-violet-300">{telem.voltage.toFixed(2)}V</p>
               </div>
               <div className="p-4 bg-white/4 border border-white/8 rounded-2xl text-center">
                 <p className="text-[9px] uppercase tracking-widest text-white/30 mb-1">L/100km</p>
@@ -272,7 +272,7 @@ export default function OBDFluxConsole() {
           <MetricCard label="Load"     value={telem.load}                 unit="%"       icon={<Cpu className="w-5 h-5" />}            accent="amber" />
           <MetricCard label="Throttle" value={telem.throttle}             unit="%"       icon={<Zap className="w-5 h-5" />}            accent="amber" />
           <MetricCard label="Coolant"  value={telem.coolant.toFixed(1)}   unit="°C"      icon={<Thermometer className="w-5 h-5" />}    accent="green" />
-          <MetricCard label="Voltage"  value={telem.voltage}              unit="V"       icon={<BatteryCharging className="w-5 h-5" />} accent="violet" />
+          <MetricCard label="Voltage"  value={telem.voltage.toFixed(2)}   unit="V"       icon={<BatteryCharging className="w-5 h-5" />} accent="violet" />
         </div>
 
         {/* Connection Blueprint + Log */}

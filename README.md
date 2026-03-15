@@ -1,42 +1,119 @@
-# Maverick Command Core: Ford Maverick Diagnostic Dashboard
+# Maverick Command Core
 
-![Maverick Command Core — OBD dongle, phone gauges, and tire pressure display](car2ls-obd-dongle-phone-gauges-tire-pressure-collage.jpg)
+A multi-platform automotive diagnostic suite for the **Ford Maverick**. Built in three layers: a desktop ECU analysis dashboard, a Capacitor-powered web OBD console, and a native iPhone app built from the same codebase.
 
-A high-fidelity, high-contrast automotive diagnostic suite for the Ford Maverick. Built with Next.js 15, Tailwind CSS, and Web Bluetooth LE API.
+---
 
-## 🚀 Overview
-The **Maverick Command Core** is a "Control Plane" for vehicle telemetry, capable of:
-- **Live OBD-II Streaming:** Real-time polling of RPM, Speed, and Engine Load via Bluetooth LE (V-LINK/ELM327).
-- **Ford ECU Analytics:** Parsing manufacturer-specific ECU dumps to map internal vehicle modules.
-- **Performance Lab:** Automatic 0-100 km/h timer and instant fuel efficiency (L/100km) tracking.
-- **Tactical HUD:** A dedicated "Heads-Up Display" mode optimized for night driving and windshield reflection.
-- **Telemetry Plotting:** Time-series visualization of sensor data trends.
+## Apps
 
-## 🎨 Design Language
-The project follows a **Tactical Diagnostic (Cyberpunk)** aesthetic:
-- **Void Black:** Background optimized for OLED and night visibility.
-- **Core Amber:** Primary accent for hardware interaction and alerts.
-- **Glassmorphism:** Layered cockpit panels with backdrop-blur effects.
-- **Monospace Data:** Precision readouts using Geist Mono.
+### 1. `maverick-ecu-app` — Desktop ECU Dashboard (port 3009)
 
-## 🛠️ Technical Resources
-- [Supported OBD-II Parameters (PIDs)](https://www.obdautodoctor.com/help/articles/supported-obd-parameters/) - Mode 01 Reference.
-- [ELM327 AT Commands](https://www.elmelectronics.com/wp-content/uploads/2016/07/ELM327DS.pdf) - Hardware communication protocols.
+High-contrast Next.js 15 dashboard for desktop/laptop use via Web Bluetooth. Connects to a V-LINK / ELM327 BLE OBD-II dongle directly from Chrome.
 
-## 📂 Project Structure
-- `maverick-ecu-app/`: The core Next.js application.
-- `Sensors.csv`: Sample telemetry logs for offline testing.
-- `ecu_scan_data.md`: Raw Ford Maverick module dumps for development.
-- `DESIGN_SPEC.md`: Detailed documentation of the visual system.
+**Capabilities:**
+- Live OBD-II streaming — RPM, Speed, Engine Load via BLE
+- Ford ECU module map parsing from raw scan dumps
+- 0–100 km/h timer and fuel efficiency (L/100km) tracking
+- Tactical HUD mode for night driving / windshield reflection
+- Time-series telemetry plotting
 
-## 🏁 Getting Started
+**Start:**
 ```bash
 cd maverick-ecu-app
 npm install
 PORT=3009 npm run dev
 ```
-> **Port note:** Registered port is **3009**. Before starting, confirm it's free:
-> `lsof -iTCP:3009 -sTCP:LISTEN`
-> If taken, pick a free port from `~/Documents/Documentation/System/PORT_REGISTRY.md` and start with `PORT=XXXX npm run dev`.
 
-Open [http://localhost:3009](http://localhost:3009) to launch the dashboard.
+---
+
+### 2. `obd-flux-app` — OBD Flux Console (port 3017)
+
+Capacitor-wrapped Next.js app. Runs as a web preview on desktop and compiles to a **native iPhone app** via Xcode. Uses the same Web Bluetooth API on desktop; on iOS it uses `@capacitor-community/bluetooth-le`.
+
+**Capabilities:**
+- Futuristic BLE dashboard with live telemetry — RPM, Speed, Throttle, Coolant, Load, Voltage
+- Rolling telemetry chart (recharts AreaChart)
+- Adapter auto-detection: IOS-VLink/FFEx, V-LINK/FFFx, Nordic UART, ISSC
+- ELM327 init sequence + Mode 01 PID polling
+- Mock mode for UI development without hardware
+- System Bus log for BLE debug
+
+**Start (web preview):**
+```bash
+cd obd-flux-app
+npm install
+PORT=3017 npm run dev
+```
+
+---
+
+### 3. `obd-flux-app/ios/` — iPhone Native App
+
+The same `obd-flux-app` compiled to a native iOS app via Capacitor. Opens in Xcode for simulator or device testing.
+
+**Build + open in Xcode:**
+```bash
+cd obd-flux-app
+npm run build          # produces out/ (static export)
+npx cap sync           # copies out/ → iOS project
+npx cap open ios       # opens Xcode
+```
+
+Then in Xcode: select a simulator or your iPhone → **Run** (⌘R).
+
+> **Bluetooth on iOS:** Bluetooth LE does not work in the iOS Simulator. Use a physical iPhone and accept the Bluetooth permission prompt on first launch.
+
+---
+
+## Project Structure
+
+```
+maverick-command-core/
+├── README.md
+├── maverick-ecu-app/       ← Desktop ECU dashboard (Next.js 15, port 3009)
+│   └── src/
+│       ├── app/            ← Next.js pages
+│       ├── components/     ← Dashboard UI components
+│       └── lib/            ← BLE service, OBD parser
+├── obd-flux-app/           ← OBD Flux Console (Next.js 15 + Capacitor, port 3017)
+│   ├── src/
+│   │   ├── app/            ← Next.js pages
+│   │   ├── components/     ← obd-dashboard.tsx (main UI)
+│   │   ├── lib/
+│   │   │   └── ble/        ← adapterProfiles, obdBleClient, parser
+│   │   └── types/          ← obd.ts (Telemetry, AdapterProfile, etc.)
+│   ├── ios/                ← Xcode project (generated by Capacitor)
+│   ├── capacitor.config.ts
+│   └── next.config.ts      ← output: 'export' (required for Capacitor)
+├── assets/                 ← Screenshots and reference photos
+└── Docs/                   ← PDFs, datasheets, ECU scan dumps, codex handoffs
+```
+
+---
+
+## Ports
+
+| App                 | Port  | Notes                          |
+|---------------------|-------|--------------------------------|
+| maverick-ecu-app    | 3009  | Desktop Web Bluetooth          |
+| obd-flux-app        | 3017  | Capacitor web preview          |
+
+Both are registered in `~/Documents/Documentation/System/PORT_REGISTRY.md`.
+
+---
+
+## Hardware
+
+- **OBD-II Adapter:** V-LINK IOS-VLink BLE / ELM327 BLE dongle
+- **Supported BLE profiles:** IOS-VLink (FFE0), V-LINK (FFF0), Nordic UART, ISSC
+- **iOS:** Physical iPhone required for live BLE (simulator does not support Bluetooth)
+- **Chrome desktop:** Web Bluetooth API (must be on HTTPS or localhost)
+
+---
+
+## Resources
+
+- [OBD-II Mode 01 PID Reference](https://www.obdautodoctor.com/help/articles/supported-obd-parameters/)
+- [ELM327 AT Command Set](https://www.elmelectronics.com/wp-content/uploads/2016/07/ELM327DS.pdf)
+- [Capacitor iOS Docs](https://capacitorjs.com/docs/ios)
+- [capacitor-community/bluetooth-le](https://github.com/capacitor-community/bluetooth-le)

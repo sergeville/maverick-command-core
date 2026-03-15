@@ -2,6 +2,12 @@ import { AdapterProfile } from '@/types/obd';
 
 export const ADAPTER_PROFILES: AdapterProfile[] = [
   {
+    name: 'IOS-VLink / FFEx',
+    service: '0000ffe0-0000-1000-8000-00805f9b34fb',
+    write:   '0000ffe2-0000-1000-8000-00805f9b34fb',
+    notify:  '0000ffe1-0000-1000-8000-00805f9b34fb',
+  },
+  {
     name: 'V-LINK / FFFx',
     service: '0000fff0-0000-1000-8000-00805f9b34fb',
     write:   '0000fff2-0000-1000-8000-00805f9b34fb',
