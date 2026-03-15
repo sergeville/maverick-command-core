@@ -1,41 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# maverick-ecu-app
 
-## Getting Started
+Desktop ECU dashboard for the **Ford Maverick**. Connects to a BLE OBD-II adapter directly from Chrome via the Web Bluetooth API.
 
-First, run the development server:
+> Full project docs and screenshots → [root README](../README.md)
+
+---
+
+## Stack
+
+- **Next.js 15** (App Router)
+- **Tailwind CSS** — high-contrast dark theme
+- **Web Bluetooth API** — Chrome desktop only
+- **TypeScript** + `@types/web-bluetooth`
+
+---
+
+## Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+PORT=3009 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open Chrome → `http://localhost:3009` → click **CONNECT OBD**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Requires Chrome on desktop (HTTPS or localhost). Firefox and Safari do not support Web Bluetooth.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## OBD-II Technical Resources
+## Features
 
-- [Supported OBD-II Parameters (PIDs)](https://www.obdautodoctor.com/help/articles/supported-obd-parameters/) - Reference for standard Mode 01 PIDs.
-- [ELM327 AT Commands](https://www.elmelectronics.com/wp-content/uploads/2016/07/ELM327DS.pdf) - Official documentation for hardware communication.
+| Tab | What it does |
+|-----|-------------|
+| **Overview** | Link status, active module count, CAN protocol, engine pulse chart |
+| **Gauges** | Live OBD PIDs — RPM, speed, coolant, intake air, throttle |
+| **Telemetry** | Time-series trend charts |
+| **DTCS** | Scan + clear stored fault codes |
+| **Modules** | Ford ECU module map from raw scan dump |
+| **History** | Archived snapshots |
 
-## Learn More
+**System Bus** panel — real-time BLE trace:
+- `TX →` commands sent (cyan)
+- `RX ←` responses received (green)
+- `INIT` / `PROF` / `SCAN` messages (yellow)
+- Errors (red)
 
-To learn more about Next.js, take a look at the following resources:
+Manual AT command input — type any ELM327 command directly.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## BLE / ELM327
 
-## Deploy on Vercel
+**Adapter:** V-LINK IOS-Vlink (ELM327-compatible)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Init sequence:
+```
+ATZ     → Reset
+ATE0    → Echo off
+ATL0    → Linefeeds off
+ATS0    → Spaces off
+ATH0    → Headers off
+ATCAF0  → CAN auto-format off  ← required for IOS-Vlink
+ATSP0   → Auto protocol
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Service discovery: all services discovered upfront via `getPrimaryServices()`. Write/notify characteristics detected by property flags — not hardcoded UUIDs. Single-char adapter fallback included.
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── layout.tsx
+│   └── page.tsx               ← main dashboard (tabs, System Bus, gauges)
+├── components/                ← UI components per tab
+└── lib/
+    ├── bluetooth-service.ts   ← BLE connect, ELM327 init, TX/RX
+    └── obd-parser.ts          ← Mode 01 PID decoder
+```

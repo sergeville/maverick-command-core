@@ -1,119 +1,101 @@
-# OBD Flux Console
+# obd-flux-app — OBD Flux Console
 
-Ford Maverick — iPhone-ready BLE OBD-II live telemetry dashboard.
+Ford Maverick — live OBD-II telemetry dashboard. Runs as a web preview on Chrome desktop and compiles to a native iPhone app via Capacitor.
 
-Built with Next.js, Tailwind CSS, Capacitor (iOS), and `@capacitor-community/bluetooth-le`.
+> Full project docs and screenshots → [root README](../README.md)
 
 ---
 
-## Architecture
+## Stack
 
-```
-obd-flux-app/
-├── capacitor.config.ts          ← Capacitor app config
-├── src/
-│   ├── app/                     ← Next.js App Router
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   ├── components/
-│   │   └── obd-dashboard.tsx    ← Main futuristic dashboard
-│   ├── lib/
-│   │   ├── utils.ts             ← clamp, delay, formatTime, calcEfficiency
-│   │   └── ble/
-│   │       ├── adapterProfiles.ts   ← V-LINK/FFFx, Nordic UART, ISSC
-│   │       ├── obdBleClient.ts      ← Web Bluetooth client (dev preview)
-│   │       └── parser.ts            ← Pure ELM327 frame parser
-│   └── types/
-│       └── obd.ts               ← Telemetry, HistoryPoint, AdapterProfile
-└── public/
-```
+- **Next.js 15** (App Router, `output: 'export'` for Capacitor)
+- **Tailwind CSS** — futuristic dark theme
+- **Capacitor** — iOS native wrapper
+- **`@capacitor-community/bluetooth-le`** — BLE on iPhone
+- **Web Bluetooth API** — BLE on Chrome desktop
 
-## Dev (browser / mock mode)
+---
+
+## Start (web preview)
 
 ```bash
-cd obd-flux-app
-node_modules/.bin/next dev --port 3017
+npm install
+PORT=3017 npm run dev
 ```
 
-Open http://localhost:3017. Runs in **Mock** mode automatically (simulated data).
-Web Bluetooth works in Chrome desktop for quick testing.
-
-> **Port:** Registered at 3017. Check `~/Documents/Documentation/System/PORT_REGISTRY.md`.
+Open `http://localhost:3017`. Mock mode runs automatically on desktop when no adapter is connected.
 
 ---
 
-## iPhone Build (Capacitor)
-
-### Prerequisites
-- macOS with Xcode installed
-- Node.js 18+
-- `npx cap` CLI
-
-### Step 1 — Build the static export
-
-Add `output: 'export'` to `next.config.ts`, then:
+## iPhone Build
 
 ```bash
-npm run build
+npm run build        # static export → out/
+npx cap sync         # copies out/ to iOS project
+npx cap open ios     # opens Xcode
 ```
 
-### Step 2 — Add iOS platform
+Select your iPhone → **⌘R**.
 
-```bash
-npm install @capacitor/cli
-npx cap add ios
-npx cap sync
-```
-
-### Step 3 — Add Bluetooth permissions to Info.plist
-
-In `ios/App/App/Info.plist`, add:
-
-```xml
-<key>NSBluetoothAlwaysUsageDescription</key>
-<string>OBD Flux Console uses Bluetooth to connect to your vehicle OBD-II adapter for live diagnostics.</string>
-<key>NSBluetoothPeripheralUsageDescription</key>
-<string>OBD Flux Console reads live engine data from your OBD-II BLE adapter.</string>
-```
-
-### Step 4 — Open in Xcode and run on device
-
-```bash
-npx cap open ios
-```
-
-Select your iPhone target, then Build & Run (⌘R).
+> BLE does not work in the iOS Simulator. Use a physical device.
 
 ---
 
-## Adapter Support
+## Features
 
-| Profile | Service UUID | Notes |
-|---------|-------------|-------|
-| V-LINK / FFFx | `0000fff0-…` | Most common ELM327 BLE |
-| Nordic UART | `6e400001-…` | Some OBDII BLE adapters |
-| ISSC / V-LINK BLE | `49535343-…` | ISSC-chipset dongles |
-
-BLE-only. Bluetooth Classic (SPP) adapters are not supported on iPhone.
-
----
-
-## Data flow
-
-1. User taps **Connect OBD-II** → browser/native BLE scan
-2. App connects to GATT server
-3. Profile auto-detected (FFFx → Nordic UART → ISSC)
-4. ELM327 init sequence: `ATZ → ATE0 → ATL0 → ATS0 → ATH0 → ATSP0`
-5. PID polling loop at 350ms/PID: RPM, Speed, Load, Coolant, Throttle, Voltage
-6. Notifications → parser → React state → UI + graph
+- Live BLE telemetry — RPM, Speed, Engine Load, Coolant Temp, Throttle, Battery Voltage
+- Rolling telemetry chart (Recharts AreaChart)
+- Adapter auto-detection — IOS-VLink/FFEx, V-LINK/FFFx, Nordic UART, ISSC
+- ELM327 init sequence + Mode 01 PID polling
+- Mock mode for UI development without hardware
+- **System Bus** log — color-coded TX/RX trace
 
 ---
 
-## Phase roadmap
+## BLE / ELM327
 
-| Phase | Status | Scope |
-|-------|--------|-------|
-| 1 — Core MVP | ✅ Done | BLE connect, ELM327 init, 6 PIDs, graph, mock mode |
-| 2 — Quality | 🔲 Next | Reconnect, better errors, test coverage |
-| 3 — Advanced | 🔲 Later | DTC read/clear, trip history, CSV export, HUD mode |
+**Adapter:** V-LINK IOS-Vlink (ELM327-compatible)
+
+Supported BLE profiles:
+
+| Service UUID (prefix) | Profile |
+|-----------------------|---------|
+| `0000ffe0` | IOS-VLink / FFEx |
+| `0000fff0` | V-LINK / FFFx |
+| `6e400001` | Nordic UART Service |
+| `49535343` | ISSC / V-LINK BLE |
+
+Init sequence:
+
+```
+ATZ     → Reset
+ATE0    → Echo off
+ATL0    → Linefeeds off
+ATS0    → Spaces off
+ATH0    → Headers off
+ATCAF0  → CAN auto-format off  ← required for IOS-Vlink
+ATSP0   → Auto protocol
+```
+
+Service discovery uses `getPrimaryServices()` upfront. Write/notify chars detected by property flags. Single-char adapter fallback (notify char used for write if no dedicated write char found). Response buffered until `>` prompt.
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   └── obd-dashboard.tsx      ← main dashboard UI
+├── lib/
+│   ├── utils.ts
+│   └── ble/
+│       ├── adapterProfiles.ts ← BLE service UUIDs + ELM327 init
+│       ├── obdBleClient.ts    ← BLE connect, char detection, TX/RX
+│       └── parser.ts          ← ELM327 frame → PID value decoder
+└── types/
+    └── obd.ts                 ← Telemetry, AdapterProfile types
+```
