@@ -33,6 +33,8 @@ final class OBDBLEManager: NSObject, ObservableObject {
     @Published var log: [String] = []
     @Published var dtcs: [DTC] = []
     @Published var dtcScanState: DTCScanState = .idle
+    @Published var initStep: String = ""        // e.g. "3 / 7 · ATH0"
+    @Published var initAcked: [Bool] = []       // true = response received
 
     enum DTCScanState: Equatable {
         case idle
@@ -138,6 +140,8 @@ final class OBDBLEManager: NSObject, ObservableObject {
         responseBuffer = ""
         initIndex = 0
         pidIndex = 0
+        initStep = ""
+        initAcked = []
     }
 
     private func mockDTCs() {
@@ -184,17 +188,21 @@ final class OBDBLEManager: NSObject, ObservableObject {
     private func startInit() {
         state = .initializing
         initIndex = 0
+        initAcked = Array(repeating: false, count: ELM327.initSequence.count)
         addLog("INIT: Starting ELM327 init sequence")
         sendNextInit()
     }
 
     private func sendNextInit() {
-        guard initIndex < ELM327.initSequence.count else {
+        let total = ELM327.initSequence.count
+        guard initIndex < total else {
+            initStep = "OK — link established"
             addLog("INIT: Complete — starting PID poll")
             startPolling()
             return
         }
         let cmd = ELM327.initSequence[initIndex]
+        initStep = "\(initIndex + 1) / \(total) · \(cmd)"
         addLog("INIT: \(cmd)")
         send(cmd)
         // Init commands get a reply via notification; advance happens in handleResponse
@@ -217,6 +225,7 @@ final class OBDBLEManager: NSObject, ObservableObject {
 
     private func handleResponse(_ response: String) {
         if initIndex < ELM327.initSequence.count {
+            if initIndex < initAcked.count { initAcked[initIndex] = true }
             initIndex += 1
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
                 self?.sendNextInit()

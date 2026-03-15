@@ -1,7 +1,7 @@
 import Foundation
 
 enum ELM327 {
-    static let initSequence = ["ATZ", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0"]
+    static let initSequence = ["ATZ", "ATE0", "ATL0", "ATS0", "ATH0", "ATCAF0", "ATSP0"]
 
     enum PID: String, CaseIterable {
         case rpm      = "010C"

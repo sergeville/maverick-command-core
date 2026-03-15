@@ -23,6 +23,11 @@ struct ConnectionView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
 
+                    // Handshake progress during init
+                    if case .initializing = manager.state {
+                        handshakeView
+                    }
+
                     Spacer()
 
                     actionButton
@@ -60,6 +65,48 @@ struct ConnectionView: View {
         case .scanning, .connecting, .initializing: return .cyan
         default: return .white.opacity(0.3)
         }
+    }
+
+    private var handshakeView: some View {
+        VStack(spacing: 6) {
+            Text("HANDSHAKE")
+                .font(.system(size: 9, design: .monospaced).weight(.bold))
+                .foregroundStyle(.white.opacity(0.3))
+                .tracking(3)
+                .padding(.bottom, 2)
+
+            ForEach(Array(ELM327.initSequence.enumerated()), id: \.offset) { i, cmd in
+                let acked = i < manager.initAcked.count && manager.initAcked[i]
+                let active = i < manager.initAcked.count && !manager.initAcked[i]
+                    && manager.initStep.contains(cmd)
+
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(acked ? Color.green : (active ? Color.cyan : Color.white.opacity(0.15)))
+                        .frame(width: 6, height: 6)
+                    Text(cmd)
+                        .font(.system(.caption2, design: .monospaced).weight(.semibold))
+                        .foregroundStyle(acked ? .green : (active ? .cyan : .white.opacity(0.3)))
+                    if active {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .scaleEffect(0.5)
+                            .tint(.cyan)
+                    }
+                    Spacer()
+                    if acked {
+                        Text("OK")
+                            .font(.system(size: 9, design: .monospaced).weight(.bold))
+                            .foregroundStyle(.green.opacity(0.7))
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(.white.opacity(0.04))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(.white.opacity(0.08)))
+        .padding(.horizontal)
     }
 
     private var actionButton: some View {
