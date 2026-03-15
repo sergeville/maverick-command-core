@@ -16,7 +16,7 @@ High-contrast Next.js 15 dashboard for desktop use via Web Bluetooth. Parses For
 
 ### Offline state — System Bus ready
 
-![Dashboard offline, hardware initializing](assets/dashboard-overview-offline-hardware-initializing.png)
+<img src="assets/dashboard-overview-offline-hardware-initializing.png" width="700" alt="Dashboard offline, hardware initializing">
 
 Link Status shows **OFFLINE / WAITING** on startup. The System Bus panel is live and accepts manual AT commands. Hardware Status reports `FEED OFFLINE: Initializing hardware bridge…` until a BLE adapter connects.
 
@@ -24,7 +24,7 @@ Link Status shows **OFFLINE / WAITING** on startup. The System Bus panel is live
 
 ### Bluetooth pairing — IOS-Vlink detected
 
-![Bluetooth pairing dialog with IOS-Vlink](assets/dashboard-bluetooth-pairing-ios-vlink-module-map.png)
+<img src="assets/dashboard-bluetooth-pairing-ios-vlink-module-map.png" width="700" alt="Bluetooth pairing dialog with IOS-Vlink">
 
 Chrome's BLE device picker appears when **CONNECT OBD** is clicked. The **IOS-Vlink** adapter is shown as already paired. The Module Map panel on the right lists all discovered ECU modules: **ABS/ESP**, **BCM**, **BECM**, **GWM**.
 
@@ -32,7 +32,7 @@ Chrome's BLE device picker appears when **CONNECT OBD** is clicked. The **IOS-Vl
 
 ### Connected — CAN protocol identified
 
-![Dashboard connected, CAN protocol, operational metrics](assets/dashboard-overview-can-protocol-operational-metrics.png)
+<img src="assets/dashboard-overview-can-protocol-operational-metrics.png" width="700" alt="Dashboard connected, CAN protocol, operational metrics">
 
 After pairing, the dashboard identifies the active CAN protocol:
 
@@ -48,7 +48,7 @@ After pairing, the dashboard identifies the active CAN protocol:
 
 ### Live gauges + Diagnostic Bus
 
-![OBD gauges scanning, Diagnostic Bus log](assets/dashboard-bluetooth-pairing-obd-gauges.png)
+<img src="assets/dashboard-bluetooth-pairing-obd-gauges.png" width="700" alt="OBD gauges scanning, Diagnostic Bus log">
 
 Overview tab with live OBD gauges (Engine Coolant, Intake Air, Speed) and the **Diagnostic Bus** log visible on the right — shows BLE discovery attempts, cancellations, and retry cycle.
 
@@ -56,7 +56,7 @@ Overview tab with live OBD gauges (Engine Coolant, Intake Air, Speed) and the **
 
 ### DTC scan — fault code B1B25
 
-![DTCS tab showing fault code B1B25](assets/dtcs-scan-b1b25-fault-code.png)
+<img src="assets/dtcs-scan-b1b25-fault-code.png" width="700" alt="DTCS tab showing fault code B1B25">
 
 The **DTCS** tab runs a system scan and surfaces stored fault codes. Here: **B1B25** (Manufacturer Specific Fault Code, MEDIUM severity). Codes can be cleared with the **CLEAR CODES** button.
 
@@ -80,33 +80,27 @@ Open Chrome → `http://localhost:3009` → click **CONNECT OBD**.
 
 Capacitor-wrapped Next.js app. Runs as a web preview on desktop; compiles to a native iPhone app via Xcode.
 
-### Standby — BLE adapter not connected
+### Standby / Scanning — connection modal
 
-![OBD Flux connection modal, standby state](assets/obd-connection-standby.png)
+| Standby | Scanning |
+|:-------:|:--------:|
+| <img src="assets/obd-connection-standby.png" width="340" alt="Connection modal standby"> | <img src="assets/obd-connection-scanning.png" width="340" alt="Connection modal scanning"> |
 
-Connection modal in **STANDBY** state before scanning. Shows adapter profile options and the Connect button.
-
----
-
-### Scanning — searching for BLE adapter
-
-![OBD Flux connection modal, scanning state](assets/obd-connection-scanning.png)
-
-**SCANNING** state with the radio animation active. Chrome's BLE requestDevice dialog is open in the background.
+Connection modal in **STANDBY** (left) and **SCANNING** (right) states. The radio animation activates as Chrome opens the BLE device picker.
 
 ---
 
 ### Dashboard — offline, BLE stack ready
 
-![OBD Flux dashboard offline with BLE ready](assets/dashboard-offline-ble-ready.png)
+<img src="assets/dashboard-offline-ble-ready.png" width="700" alt="OBD Flux dashboard offline with BLE ready">
 
-Main dashboard in **STANDBY** mode. The System Bus panel confirms BLE is powered on. The **CONNECT OBD-II** button is ready. All gauge tiles show `—` until a live connection is established.
+Main dashboard in **STANDBY** mode. The System Bus panel confirms BLE is powered on. All gauge tiles show `—` until a live connection is established.
 
 ---
 
 ### Connected — TX/RX trace visible
 
-![OBD Flux dashboard connected to IOS-Vlink, TX/RX trace](assets/dashboard-connected-iosvlink-tx-rx-trace-searching-stopped.png)
+<img src="assets/dashboard-connected-iosvlink-tx-rx-trace-searching-stopped.png" width="700" alt="OBD Flux dashboard connected to IOS-Vlink, TX/RX trace">
 
 Live connection to the **IOS-Vlink** adapter. The System Bus log shows the full ELM327 handshake:
 
@@ -114,13 +108,13 @@ Live connection to the **IOS-Vlink** adapter. The System Bus log shows the full 
 - **Green** lines → `RX ←` responses received
 - **Yellow** lines → `INIT` / `PROF` / `SCAN` status messages
 
-The `SEARCHING... STOPPED` response from the adapter is normal when **ignition is off** — the ELM327 found no CAN bus activity. DTC count shows **0 CODES** (clean).
+The `SEARCHING... STOPPED` response is normal when **ignition is off** — the ELM327 found no CAN bus activity. DTC count shows **0 CODES** (clean).
 
 ---
 
 ### Diagnostics + System Bus log
 
-![Dashboard diagnostics scanning with System Bus](assets/dashboard-diagnostics-scanning-system-bus.png)
+<img src="assets/dashboard-diagnostics-scanning-system-bus.png" width="700" alt="Dashboard diagnostics scanning with System Bus">
 
 System Bus log during a diagnostics scan. Yellow `SCAN` entries show the adapter cycling through OBD modes to enumerate fault codes and live PIDs.
 
@@ -158,7 +152,7 @@ Pure Swift app using CoreBluetooth directly — no WebView, no Capacitor bridge.
 
 ### Live OBD data — combined chart
 
-![iOS app combined chart with live OBD PID list](assets/obd-combined-chart-list-part1.png)
+<img src="assets/obd-combined-chart-list-part1.png" width="360" alt="iOS app combined chart with live OBD PID list">
 
 Combined chart view listing all active OBD PIDs with live values:
 
@@ -176,7 +170,7 @@ First run requires trusting the development certificate on-device:
 
 | Step 1 — Device Management | Step 2 — Trust Developer |
 |:--------------------------:|:------------------------:|
-| ![VPN & Device Management](assets/iphone-vpn-device-management.png) | ![Trust Developer dialog](assets/iphone-trust-developer.png) |
+| <img src="assets/iphone-vpn-device-management.png" width="300" alt="VPN & Device Management"> | <img src="assets/iphone-trust-developer.png" width="300" alt="Trust Developer dialog"> |
 
 **Settings → General → VPN & Device Management** → select the developer certificate → **Trust**.
 
@@ -198,7 +192,7 @@ Set your **Development Team** in Signing & Capabilities → select your iPhone �
 
 **OBD-II Adapter:** V-LINK IOS-Vlink BLE (ELM327-compatible)
 
-![OBD-II port reference](assets/OBD2.png)
+<img src="assets/OBD2.png" width="500" alt="OBD-II port reference">
 
 The adapter plugs into the OBD-II port (under the dash, driver's side). It communicates via Bluetooth Low Energy using the ELM327 AT command protocol.
 
@@ -227,7 +221,7 @@ ATSP0   → Auto protocol
 
 | ELM connected, ECU connecting | DTC scan — 4 of 21 modules |
 |:-----------------------------:|:--------------------------:|
-| ![Car Scanner Pro ELM connected](assets/car-scanner-pro-elm-connected-ecu-connecting-ignition-off.png) | ![Car Scanner DTC scan C050C U0415](assets/car-scanner-pro-dtc-scan-4-of-21-modules-C050C-U0415.png) |
+| <img src="assets/car-scanner-pro-elm-connected-ecu-connecting-ignition-off.png" width="340" alt="Car Scanner Pro ELM connected"> | <img src="assets/car-scanner-pro-dtc-scan-4-of-21-modules-C050C-U0415.png" width="340" alt="Car Scanner DTC scan C050C U0415"> |
 
 The IOS-Vlink adapter was validated against Car Scanner Pro before integration. Confirmed working on the Ford Maverick CAN bus (ISO 15765-4, 11-bit ID, 500 kbaud).
 
