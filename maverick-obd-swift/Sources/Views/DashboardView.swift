@@ -21,6 +21,7 @@ struct DashboardView: View {
                     speedHero
                     TelemetryChartView(history: manager.history)
                     metricGrid
+                    DiagnosticsView(manager: manager)
                     blueprintSection
                     SystemBusView(log: manager.log)
                 }

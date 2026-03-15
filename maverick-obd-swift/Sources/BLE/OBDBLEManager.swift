@@ -31,6 +31,15 @@ final class OBDBLEManager: NSObject, ObservableObject {
     @Published var telemetry = Telemetry.zero
     @Published var history: [HistoryPoint] = []
     @Published var log: [String] = []
+    @Published var dtcs: [DTC] = []
+    @Published var dtcScanState: DTCScanState = .idle
+
+    enum DTCScanState: Equatable {
+        case idle
+        case scanning
+        case done(count: Int)
+        case error(String)
+    }
 
     private var central: CBCentralManager!
     private var peripheral: CBPeripheral?
@@ -42,6 +51,7 @@ final class OBDBLEManager: NSObject, ObservableObject {
     private var initIndex = 0
     private var pidIndex = 0
     private var pollTimer: Timer?
+    private var dtcScanPending = false
 
     private let maxHistory = 120
     private let pollInterval: TimeInterval = 0.25
@@ -73,6 +83,42 @@ final class OBDBLEManager: NSObject, ObservableObject {
         central.scanForPeripherals(withServices: AdapterProfile.serviceUUIDs, options: nil)
     }
 
+    func scanDTCs() {
+        guard state.isConnected else {
+            addLog("ERR: Not connected — cannot scan DTCs")
+            dtcScanState = .error("Not connected")
+            return
+        }
+        #if targetEnvironment(simulator)
+        mockDTCs()
+        return
+        #endif
+        addLog("DTC: Sending Mode 03 request")
+        dtcScanState = .scanning
+        dtcScanPending = true
+        pollTimer?.invalidate()
+        pollTimer = nil
+        send("03")
+    }
+
+    func clearDTCs() {
+        guard state.isConnected else { return }
+        #if targetEnvironment(simulator)
+        dtcs = []
+        dtcScanState = .idle
+        addLog("SIM: DTCs cleared")
+        return
+        #endif
+        addLog("DTC: Sending Mode 04 — clear DTCs")
+        send("04")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.dtcs = []
+            self?.dtcScanState = .idle
+            self?.addLog("DTC: Codes cleared — rescan to verify")
+            self?.startPolling()
+        }
+    }
+
     func disconnect() {
         pollTimer?.invalidate()
         pollTimer = nil
@@ -92,6 +138,17 @@ final class OBDBLEManager: NSObject, ObservableObject {
         responseBuffer = ""
         initIndex = 0
         pidIndex = 0
+    }
+
+    private func mockDTCs() {
+        dtcScanState = .scanning
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self else { return }
+            let codes = ["P0300", "P0171", "P0420"]
+            self.dtcs = codes.map { DTCDatabase.lookup($0) }
+            self.dtcScanState = .done(count: self.dtcs.count)
+            self.addLog("SIM: Mock DTC scan — \(self.dtcs.count) codes")
+        }
     }
 
     private func startMockFeed() {
@@ -166,6 +223,26 @@ final class OBDBLEManager: NSObject, ObservableObject {
             }
             return
         }
+
+        // DTC scan response (Mode 03 → header 43)
+        if dtcScanPending {
+            dtcScanPending = false
+            let cleaned = response.replacingOccurrences(of: "\r", with: "")
+                                  .replacingOccurrences(of: "\n", with: "")
+            let codes = DTC.parseMode03(cleaned)
+            if codes.isEmpty {
+                addLog("DTC: No fault codes found")
+                dtcs = []
+                dtcScanState = .done(count: 0)
+            } else {
+                dtcs = codes.map { DTCDatabase.lookup($0) }
+                dtcScanState = .done(count: codes.count)
+                addLog("DTC: Found \(codes.count) code(s): \(codes.joined(separator: ", "))")
+            }
+            startPolling()
+            return
+        }
+
         if let partial = ELM327.parse(response) {
             merge(partial)
         }
