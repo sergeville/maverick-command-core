@@ -44,3 +44,8 @@ coverage/
 .cache/
 .parcel-cache/
 .vercel
+
+# Xcode user data
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
