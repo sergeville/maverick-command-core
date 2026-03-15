@@ -319,11 +319,18 @@ export default function OBDFluxConsole() {
               <span className="text-[10px] font-black uppercase tracking-widest text-white/30">System Bus</span>
               <Car className="w-3.5 h-3.5 text-white/20" />
             </div>
-            <div className="flex-1 p-4 font-mono text-[10px] text-cyan-400/50 space-y-1 overflow-y-auto max-h-48">
+            <div className="flex-1 p-4 font-mono text-[10px] space-y-1 overflow-y-auto max-h-48">
               {logs.length === 0 ? (
                 <p className="text-white/15 italic">Awaiting telemetry…</p>
               ) : (
-                logs.map((l, i) => <div key={i} className="truncate">{l}</div>)
+                logs.map((l, i) => {
+                  const cls = l.includes('TX →') ? 'text-cyan-400/80'
+                    : l.includes('RX ←') ? 'text-emerald-400/80'
+                    : l.includes('ERR') || l.includes('FATAL') ? 'text-red-400/90'
+                    : l.includes('INIT') || l.includes('SCAN') || l.includes('PROF') ? 'text-yellow-400/70'
+                    : 'text-white/35';
+                  return <div key={i} className={`truncate ${cls}`}>{l}</div>;
+                })
               )}
             </div>
           </div>

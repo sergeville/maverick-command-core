@@ -331,7 +331,7 @@ export default function MaverickDashboard() {
     setIsConnecting(true);
     if (!bluetoothRef.current) {
       bluetoothRef.current = new BluetoothService((incoming) => {
-        addLog(`<< ${incoming}`);
+        addLog(incoming);
         pulseHeartbeat();
         if (incoming.includes('41 0C')) { 
           const hex = incoming.split(' ').slice(2, 4).join('');
@@ -479,8 +479,15 @@ export default function MaverickDashboard() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 flex items-center gap-2"><Terminal className="w-3 h-3" /> System Bus</span>
                   <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-500'}`} />
                 </div>
-                <div className="p-4 font-mono text-[9px] text-amber-500/60 flex-1 overflow-y-auto space-y-1">
-                  {[...logs].map((log, i) => <div key={i} className="truncate">{log}</div>)}
+                <div className="p-4 font-mono text-[9px] flex-1 overflow-y-auto space-y-1">
+                  {[...logs].map((log, i) => {
+                    const cls = log.includes('TX →') ? 'text-cyan-400/80'
+                      : log.includes('RX ←') || log.startsWith('<<') ? 'text-emerald-400/80'
+                      : log.includes('ERR') || log.includes('FATAL') ? 'text-red-400/90'
+                      : log.includes('INIT') || log.includes('SCAN') || log.includes('PROF') ? 'text-yellow-400/70'
+                      : 'text-amber-500/60';
+                    return <div key={i} className={`truncate ${cls}`}>{log}</div>;
+                  })}
                 </div>
                 <form onSubmit={sendManualCommand} className="p-2 bg-amber-500/5 border-t border-amber-500/10 flex gap-2">
                   <input type="text" value={command} onChange={(e) => setCommand(e.target.value.toUpperCase())} placeholder="AT CMD..." className="flex-1 bg-black/40 border border-amber-500/20 rounded-lg px-3 py-2 text-[10px] font-mono focus:outline-none focus:border-amber-500/50" />
