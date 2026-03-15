@@ -31,5 +31,5 @@ targets:
       PRODUCT_BUNDLE_IDENTIFIER: com.maverick.obdflux.native
       MARKETING_VERSION: "1.0"
       CURRENT_PROJECT_VERSION: "1"
-      DEVELOPMENT_TEAM: ""
+      DEVELOPMENT_TEAM: "958UQ2WYWB"
       INFOPLIST_FILE: Sources/Info.plist
