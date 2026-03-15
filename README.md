@@ -1,5 +1,7 @@
 # Maverick Command Core: Ford Maverick Diagnostic Dashboard
 
+![Maverick Command Core — OBD dongle, phone gauges, and tire pressure display](car2ls-obd-dongle-phone-gauges-tire-pressure-collage.jpg)
+
 A high-fidelity, high-contrast automotive diagnostic suite for the Ford Maverick. Built with Next.js 15, Tailwind CSS, and Web Bluetooth LE API.
 
 ## 🚀 Overview
