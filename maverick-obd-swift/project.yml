@@ -3,7 +3,7 @@ name: MaverickOBD
 options:
   bundleIdPrefix: com.maverick
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "17.0"
   xcodeVersion: "15"
   createIntermediateGroups: true
 

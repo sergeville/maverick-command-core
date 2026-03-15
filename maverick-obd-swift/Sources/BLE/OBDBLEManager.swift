@@ -48,12 +48,22 @@ final class OBDBLEManager: NSObject, ObservableObject {
 
     override init() {
         super.init()
+        #if !targetEnvironment(simulator)
         central = CBCentralManager(delegate: self, queue: .main)
+        #else
+        addLog("SIM: Simulator detected — starting mock data feed")
+        startMockFeed()
+        #endif
     }
 
     // MARK: - Public API
 
     func connect() {
+        #if targetEnvironment(simulator)
+        addLog("SIM: BLE unavailable in simulator — mock mode active")
+        state = .connected(profileName: "Mock", deviceName: "Simulator")
+        return
+        #endif
         guard central.state == .poweredOn else {
             addLog("ERR: Bluetooth not powered on")
             return
@@ -82,6 +92,22 @@ final class OBDBLEManager: NSObject, ObservableObject {
         responseBuffer = ""
         initIndex = 0
         pidIndex = 0
+    }
+
+    private func startMockFeed() {
+        state = .connected(profileName: "Mock", deviceName: "Simulator")
+        pollTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            let t = Double(Date().timeIntervalSince1970)
+            var partial = Telemetry()
+            partial.rpm     = 800 + abs(sin(t * 0.5)) * 3000
+            partial.speed   = abs(sin(t * 0.3)) * 120
+            partial.load    = 20 + abs(sin(t * 0.4)) * 60
+            partial.coolant = 82 + sin(t * 0.1) * 8
+            partial.throttle = 10 + abs(sin(t * 0.6)) * 40
+            partial.voltage  = 13.5 + sin(t * 0.2) * 0.4
+            self.merge(partial)
+        }
     }
 
     private func addLog(_ msg: String) {
