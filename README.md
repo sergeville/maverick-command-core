@@ -33,6 +33,10 @@ The project follows a **Tactical Diagnostic (Cyberpunk)** aesthetic:
 ```bash
 cd maverick-ecu-app
 npm install
-npm run dev
+PORT=3009 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) to launch the dashboard.
+> **Port note:** Registered port is **3009**. Before starting, confirm it's free:
+> `lsof -iTCP:3009 -sTCP:LISTEN`
+> If taken, pick a free port from `~/Documents/Documentation/System/PORT_REGISTRY.md` and start with `PORT=XXXX npm run dev`.
+
+Open [http://localhost:3009](http://localhost:3009) to launch the dashboard.
