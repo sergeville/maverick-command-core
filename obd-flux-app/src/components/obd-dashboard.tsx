@@ -11,15 +11,12 @@ import {
 } from 'recharts';
 import { Telemetry, HistoryPoint, ConnectionStatus } from '@/types/obd';
 import { ObdBleClient } from '@/lib/ble/obdBleClient';
+import { clamp, formatTime, calcEfficiency } from '@/lib/utils';
 
 const INITIAL: Telemetry = {
   rpm: 812, speed: 0, coolant: 72, throttle: 8,
   load: 13, fuelRate: 1.1, voltage: 12.4,
 };
-
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n));
-}
 
 function MetricCard({
   label, value, unit, icon, accent = 'cyan',
@@ -111,14 +108,11 @@ export default function OBDFluxConsole() {
   // Build history
   useEffect(() => {
     const now = new Date();
-    const stamp = `${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    const stamp = formatTime(now);
     setHistory(prev => [...prev, { t: stamp, rpm: telem.rpm, speed: telem.speed, load: telem.load }].slice(-30));
   }, [telem]);
 
-  const efficiency = useMemo(() => {
-    if (telem.speed < 5) return '—';
-    return ((telem.fuelRate / Math.max(telem.speed, 1)) * 100).toFixed(1);
-  }, [telem]);
+  const efficiency = useMemo(() => calcEfficiency(telem.fuelRate, telem.speed), [telem.fuelRate, telem.speed]);
 
   async function connectBluetooth() {
     if (!('bluetooth' in navigator)) {

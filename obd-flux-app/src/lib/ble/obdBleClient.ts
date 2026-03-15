@@ -5,10 +5,7 @@
 import { AdapterProfile } from '@/types/obd';
 import { ADAPTER_PROFILES, ELM327_INIT, PIDS } from './adapterProfiles';
 import { parseElmFrame } from './parser';
-
-function delay(ms: number) {
-  return new Promise((r) => setTimeout(r, ms));
-}
+import { delay } from '@/lib/utils';
 
 export class ObdBleClient {
   private device: BluetoothDevice | null = null;
