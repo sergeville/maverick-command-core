@@ -20,6 +20,7 @@
 		C53E22CB6F1E15EFB347D199 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93074799220C1A813E675A00 /* DashboardView.swift */; };
 		E0D8298D2D682D8C74442D30 /* MetricCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BC1EC7FF55E3C5EAAFF8DEE /* MetricCardView.swift */; };
 		E4A613859FCB35AD2F3A228A /* AdapterProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8361AC4CA47C87115E9666B /* AdapterProfile.swift */; };
+		FF56CF069E0B5265BB04F309 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0F8611229D44CABA3CC546C /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +28,7 @@
 		11249D4B39EBC5624F41F099 /* ConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionView.swift; sourceTree = "<group>"; };
 		1E8E62B142E5B277B5FD1D1F /* TelemetryChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryChartView.swift; sourceTree = "<group>"; };
 		321124124CCE4BE8C5203FD6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		534A1A76EDF26B701BB81691 /* MaverickOBD.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MaverickOBD.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		534A1A76EDF26B701BB81691 /* MaverickOBD.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MaverickOBD.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5CDC288578E7EEFAE6BF940A /* DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsView.swift; sourceTree = "<group>"; };
 		7BC1EC7FF55E3C5EAAFF8DEE /* MetricCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricCardView.swift; sourceTree = "<group>"; };
 		820C299FD43BBEB3636F8391 /* MaverickOBDApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MaverickOBDApp.swift; sourceTree = "<group>"; };
@@ -35,6 +36,7 @@
 		93074799220C1A813E675A00 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		97571ECBEA00EDB838EBE580 /* OBDBLEManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OBDBLEManager.swift; sourceTree = "<group>"; };
 		9AE178C073B0442999D1C679 /* ELM327.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ELM327.swift; sourceTree = "<group>"; };
+		A0F8611229D44CABA3CC546C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BABC3352828800D0B483CAF1 /* SystemBusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemBusView.swift; sourceTree = "<group>"; };
 		F53256EE6DC547055D44BAA7 /* DTCDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DTCDatabase.swift; sourceTree = "<group>"; };
 		F8361AC4CA47C87115E9666B /* AdapterProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdapterProfile.swift; sourceTree = "<group>"; };
@@ -93,6 +95,7 @@
 		E3E0F9D669992F4012AE29B2 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				A0F8611229D44CABA3CC546C /* Assets.xcassets */,
 				321124124CCE4BE8C5203FD6 /* Info.plist */,
 				820C299FD43BBEB3636F8391 /* MaverickOBDApp.swift */,
 				CD7A05DB336B223E925509F0 /* BLE */,
@@ -110,6 +113,7 @@
 			buildConfigurationList = 208A2EC66AC1A41719CCB3C4 /* Build configuration list for PBXNativeTarget "MaverickOBD" */;
 			buildPhases = (
 				AE2C95259A484C1AA05A6727 /* Sources */,
+				F49C0138420E421D606EA35F /* Resources */,
 			);
 			buildRules = (
 			);
@@ -130,6 +134,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					EFD55E5C2664BBB6F5F07AC0 = {
+						DevelopmentTeam = 958UQ2WYWB;
+					};
+				};
 			};
 			buildConfigurationList = E8A2738F614B8C8CA8B61EAE /* Build configuration list for PBXProject "MaverickOBD" */;
 			developmentRegion = en;
@@ -149,6 +158,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F49C0138420E421D606EA35F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FF56CF069E0B5265BB04F309 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AE2C95259A484C1AA05A6727 /* Sources */ = {
@@ -236,7 +256,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8GTRA62F55;
+				DEVELOPMENT_TEAM = 958UQ2WYWB;
 				INFOPLIST_FILE = Sources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -319,7 +339,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 8GTRA62F55;
+				DEVELOPMENT_TEAM = 958UQ2WYWB;
 				INFOPLIST_FILE = Sources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
