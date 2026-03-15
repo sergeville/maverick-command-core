@@ -207,13 +207,19 @@ export default function MaverickDashboard() {
       stopPolling.current = false;
       const poll = async () => {
         if (stopPolling.current || !bluetoothRef.current) return;
-        
+
         // Sequential Cycle: RPM -> Speed -> Wait -> Repeat
-        await bluetoothRef.current.sendCommand('010C');
-        await new Promise(r => setTimeout(r, 300));
-        await bluetoothRef.current.sendCommand('010D');
-        await new Promise(r => setTimeout(r, 300));
-        
+        try {
+          await bluetoothRef.current.sendCommand('010C');
+          await new Promise(r => setTimeout(r, 300));
+          if (stopPolling.current) return;
+          await bluetoothRef.current.sendCommand('010D');
+          await new Promise(r => setTimeout(r, 300));
+        } catch (e) {
+          addLog('POLL: Command failed, retrying...');
+          await new Promise(r => setTimeout(r, 1000));
+        }
+
         poll();
       };
       poll();
@@ -238,6 +244,13 @@ export default function MaverickDashboard() {
   }, [liveMetrics.speed, perfTimer.isRunning, perfTimer.result]);
 
   const addLog = (msg: string) => setLogs(prev => [msg, ...prev].slice(0, 15));
+
+  const loadHistoryItem = (snap: typeof data) => {
+    if (!snap) return;
+    setData(snap);
+    setActiveTab('overview');
+    addLog(`HISTORY: Loaded snapshot from ${new Date(snap.timestamp).toLocaleString()}`);
+  };
 
   const pulseHeartbeat = () => {
     setHeartbeat(true);
@@ -432,7 +445,7 @@ export default function MaverickDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { label: 'Link Status', value: isConnected ? 'CONNECTED' : isConnecting ? 'CONNECTING' : isSimulating ? 'SIMULATING' : 'OFFLINE', icon: ShieldCheck },
-                  { label: 'Data Heartbeat', value: heartbeat ? 'PACKET IN' : 'WAITING', icon: Heartbeat },
+                  { label: 'Data Heartbeat', value: heartbeat ? 'PACKET IN' : isSimulating ? 'SIMULATING' : isConnected ? 'POLLING' : 'IDLE', icon: Heartbeat },
                   { label: 'Diagnostic Count', value: data.modules.length, icon: Cpu }
                 ].map((stat, i) => (
                   <div key={i} className={`bg-zinc-900/20 border border-amber-500/10 p-6 rounded-2xl relative overflow-hidden transition-colors ${i === 1 && heartbeat ? 'bg-amber-500/5 border-amber-500/40' : ''}`}>

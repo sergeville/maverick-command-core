@@ -61,13 +61,22 @@ export class BluetoothService {
       // If known pipes fail, perform a full inventory
       if (!this.characteristic) {
         this.onDataReceived("WARN: Known pipes failed. Performing Full Inventory...");
-        const services = await this.server.getPrimaryServices();
-        services.forEach(s => this.onDataReceived(`INVENTORY: Found Service ${s.uuid}`));
+        try {
+          const services = await this.server.getPrimaryServices();
+          services.forEach(s => this.onDataReceived(`INVENTORY: Found Service ${s.uuid}`));
+        } catch (e) {
+          this.onDataReceived("INVENTORY: Could not enumerate — add service UUID to optionalServices.");
+        }
         throw new Error('Pipe mismatch. Check Inventory logs.');
       }
 
-      await this.characteristic.startNotifications();
-      this.characteristic.addEventListener('characteristicvaluechanged', this.handleNotifications);
+      const props = this.characteristic.properties;
+      if (props.notify || props.indicate) {
+        await this.characteristic.startNotifications();
+        this.characteristic.addEventListener('characteristicvaluechanged', this.handleNotifications);
+      } else {
+        this.onDataReceived("WARN: Char has no notify — polling mode only.");
+      }
       this.onDataReceived("LINK: Pipe Open. Waiting for hardware stability...");
       await new Promise(r => setTimeout(r, 1000)); // 1s Warm-up
 
@@ -135,7 +144,12 @@ export class BluetoothService {
   async sendCommand(command: string): Promise<void> {
     if (!this.characteristic) return;
     const data = new TextEncoder().encode(command + '\r');
-    await this.characteristic.writeValue(data);
+    const props = this.characteristic.properties;
+    if (props.writeWithoutResponse) {
+      await this.characteristic.writeValueWithoutResponse(data);
+    } else {
+      await this.characteristic.writeValueWithResponse(data);
+    }
   }
 
   async disconnect() {
