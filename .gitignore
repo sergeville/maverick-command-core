@@ -49,3 +49,6 @@ coverage/
 xcuserdata/
 *.xcworkspace/xcuserdata/
 *.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+
+# mac-meta tool artifacts
+.mac-meta*
